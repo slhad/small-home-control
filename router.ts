@@ -19,7 +19,11 @@ let detector = new Detector();
 
 router.use(bodyParser.json());
 
-router.post("/", (req, resp)=> {
+router.get("/hook", (req, resp)=> {
+    resp.send("ok");
+});
+
+router.post("/hook", (req, resp)=> {
     if (req.body) {
         console.log(req.body);
     }
