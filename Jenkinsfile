@@ -15,8 +15,8 @@ node {
     }
     stage('Deploy') {
         if (env.BRANCH_NAME == "master") {
-            sh "docker stop small-home-control"
-            sh "docker rm small-home-control"
+            sh "docker stop small-home-control || exit 0"
+            sh "docker rm small-home-control || exit 0"
             sh "docker pull slhad/small-home-control"
             sh "docker run --restart=always -d -p 45002:40000 --name small-home-control slhad/small-home-control"
         }
