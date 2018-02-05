@@ -1,0 +1,26 @@
+{
+  "name": "small-home-control",
+  "version": "0.0.1",
+  "description": "Control Xbox One power up and samsung remote",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No test specified\" && exit 0"
+  },
+  "keywords": [
+    "xbox-one",
+    "samsung",
+    "control"
+  ],
+  "author": "Sylvain Rivierre",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "samsung-remote": "^1.2.5",
+    "xbox-on": "0.0.10"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.16.8",
+    "@types/express": "^4.11.1"
+  }
+}
