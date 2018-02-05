@@ -17,6 +17,7 @@
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "samsung-remote": "^1.2.5",
+    "typescript": "^2.7.1",
     "xbox-on": "0.0.10"
   },
   "devDependencies": {
