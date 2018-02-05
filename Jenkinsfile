@@ -15,10 +15,16 @@ node {
     }
     stage('Deploy') {
         if (env.BRANCH_NAME == "master") {
-            sh "docker stop small-home-control || exit 0"
-            sh "docker rm small-home-control || exit 0"
-            sh "docker pull slhad/small-home-control"
-            sh "docker run --restart=always -d -p 45002:40000 --name small-home-control slhad/small-home-control"
+            withCredentials([string(credentialsId: 'br_ip', variable: 'br_ip')
+                             , string(credentialsId: 'tv_ip', variable: 'tv_ip')
+                             , string(credentialsId: 'xbox_one_live_device_id', variable: 'xbox_one_live_device_id')
+                             , string(credentialsId: 'xbox_one_ip', variable: 'xbox_one_ip')
+            ]) {
+                sh "docker stop small-home-control || exit 0"
+                sh "docker rm small-home-control || exit 0"
+                sh "docker pull slhad/small-home-control"
+                sh "docker run --restart=always -d -p 45002:40000 -e tv_ip=$tv_ip -e br_ip=$br_ip -e xbox_one_live_device_id=$xbox_one_live_device_id -e xbox_one_ip=$xbox_one_ip --name small-home-control slhad/small-home-control"
+            }
         }
     }
 }
