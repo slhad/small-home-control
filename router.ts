@@ -37,7 +37,8 @@ router.post("/hook", (req, resp)=> {
 
             console.log("detected: " + JSON.stringify(detectedCMD));
 
-            if (detectedCMD.device === Device.NONE) {
+            if (detectedCMD.device === Device.NONE || !detectedCMD.cmdDefinition) {
+                console.log("no match detected");
                 return;
             }
 
