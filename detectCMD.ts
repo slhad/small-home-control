@@ -52,6 +52,7 @@ export class Detector {
             return detected;
         } else {
             data = data.toLowerCase().trim();
+            console.log("detector:[" + data + "]")
             detected = {
                 device: this.detectDevice(data),
                 times: 0,

@@ -33,7 +33,6 @@ router.post("/hook", (req, resp)=> {
         let data: string = req.body.data;
 
         if (data) {
-            data = data.toLowerCase().trim();
             let detectedCMD = detector.detect(data);
 
             console.log("detected: " + JSON.stringify(detectedCMD));
