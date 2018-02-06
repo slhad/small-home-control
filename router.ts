@@ -20,6 +20,7 @@ let detector = new Detector();
 router.use(bodyParser.json());
 
 router.get("/hook", (req, resp)=> {
+    console.log("sent ok");
     resp.send("ok");
 });
 
@@ -33,6 +34,8 @@ router.post("/hook", (req, resp)=> {
 
         if (data) {
             let detectedCMD = detector.detect(data);
+
+            console.log("detected: " + JSON.stringify(detectedCMD));
 
             if (detectedCMD.device === Device.NONE) {
                 return;
