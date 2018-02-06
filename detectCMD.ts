@@ -67,7 +67,7 @@ export class Detector {
                     console.log("cmd : [" + JSON.stringify(detected.cmdDefinition) + "]");
                 }
 
-                if (detected.cmdDefinition.multiple) {
+                if (detected.cmdDefinition && detected.cmdDefinition.multiple) {
                     detected.times = this.detectTimes(data);
                 } else {
                     detected.times = 1;

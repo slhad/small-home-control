@@ -61,7 +61,11 @@ router.post("/hook", (req, resp)=> {
                         delay: 1000,
                         waitForCallback: true
                     };
-                    xboxOne.powerOn(options)
+                    for (let x = 0; x < 5; x++) {
+                        setTimeout(()=> {
+                            xboxOne.powerOn(options)
+                        }, x * 1000);
+                    }
                 }
             }
         }
