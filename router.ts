@@ -59,7 +59,7 @@ router.post("/hook", (req, resp)=> {
                     let options = {
                         tries: 5,
                         delay: 1000,
-                        waitForCallback: false
+                        waitForCallback: true
                     };
                     xboxOne.powerOn(options)
                 }

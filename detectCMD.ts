@@ -35,7 +35,7 @@ let assocCMD: AssociationCMD[] = [
     {cmd: "KEY_HDMI4", terms: ["select hdmi 4", "selectionne hdmi 4"]},
     {cmd: "KEY_VOLUP", terms: ["plus fort", "louder", "volume up", "monte le son"], multiple: true},
     {cmd: "KEY_VOLDOWN", terms: ["moins fort", "quieter", "volume down", "baisse le son"], multiple: true},
-    {cmd: "KEY_MUTE", terms: ["shut up", "mute", "ta gueule", "ferme la", "tais-toi", "tais toi"]},
+    {cmd: "KEY_MUTE", terms: ["shut up", "mute", "ta gueule", "ferme la", "tais-toi", "tais - toi", "tais toi"]},
     {cmd: "on", terms: ["allumage", "power on", "ok", "on", "reveille toi", "réveille - toi", "wake up", "up"]}
 ];
 
