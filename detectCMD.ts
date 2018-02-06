@@ -51,7 +51,7 @@ export class Detector {
         if (!data) {
             return detected;
         } else {
-            data = data.toLowerCase();
+            data = data.toLowerCase().trim();
             detected = {
                 device: this.detectDevice(data),
                 times: 0,
