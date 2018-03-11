@@ -1,11 +1,15 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es5",
+    "target": "es2015",
     "inlineSourceMap": true,
     "inlineSources": true,
     "moduleResolution": "node",
-    "allowJs": false
+    "allowJs": false,
+    "allowUnreachableCode": false,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true
   },
   "types": [
     "node",
