@@ -74,6 +74,7 @@ export class Detector {
 
     detectWit = (data: string): Promise<VoiceCMD> => {
         return this.witClient.message(data, {}).then((sentence)=> {
+            console.log(JSON.stringify(sentence));
             return new Promise<VoiceCMD>((accept, reject)=> {
 
                 let cmdDef: AssociationCMD = null;
@@ -95,9 +96,17 @@ export class Detector {
                                 device = this.detectUniqDevice(value);
                             } else if (entityKey === "on_off") {
                                 let powerChoice = "power" + value.substr(0, 1).toUpperCase() + value.substr(1);
-                                cmdDef = this.detectUniqCMD(powerChoice);
+                                let c = this.detectUniqCMD(powerChoice);
+                                if (c) {
+                                    cmdDef = c;
+                                }
                             } else if (entityKey === "number") {
                                 times = value as any as number;
+                            } else {
+                                let c = this.detectUniqCMD(entityKey);
+                                if (c) {
+                                    cmdDef = c;
+                                }
                             }
                         }
                     }
