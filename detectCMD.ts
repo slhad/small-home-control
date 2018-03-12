@@ -94,7 +94,7 @@ export class Detector {
 
                             if (entityKey === "device") {
                                 device = this.detectUniqDevice(value);
-                            } else if (entityKey === "on_off") {
+                            } else if (entityKey === "on_off_toggle") {
                                 let powerChoice = "power" + value.substr(0, 1).toUpperCase() + value.substr(1);
                                 let c = this.detectUniqCMD(powerChoice);
                                 if (c) {
