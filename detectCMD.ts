@@ -33,10 +33,7 @@ let assocDevices: AssociationDevice[] = [
 ];
 
 let assocCMD: AssociationCMD[] = [
-    {cmd: "KEY_HDMI1", uniqTerm: "selectHDMI1", terms: ["select hdmi 1", "selectionne hdmi 1"]},
-    {cmd: "KEY_HDMI2", uniqTerm: "selectHDMI2", terms: ["select hdmi 2", "selectionne hdmi 2"]},
-    {cmd: "KEY_HDMI3", uniqTerm: "selectHDMI3", terms: ["select hdmi 3", "selectionne hdmi 3"]},
-    {cmd: "KEY_HDMI4", uniqTerm: "selectHDMI4", terms: ["select hdmi 4", "selectionne hdmi 4"]},
+    {cmd: "KEY_HDMI", uniqTerm: "selectHDMI", terms: ["select hdmi", "selectionne hdmi"]},
     {cmd: "KEY_VOLUP", uniqTerm: "volumeUp", terms: ["plus fort", "louder", "volume up", "monte le son"], multiple: true},
     {cmd: "KEY_VOLDOWN", uniqTerm: "volumeDown", terms: ["moins fort", "quieter", "volume down", "baisse le son"], multiple: true},
     {cmd: "KEY_MUTE", uniqTerm: "volumeMute", terms: ["shut up", "mute", "ta gueule", "ferme la", "tais-toi", "tais - toi", "tais toi"]},
@@ -46,6 +43,118 @@ let assocCMD: AssociationCMD[] = [
 let contains = (data: string, search: string)=> {
     return data.indexOf(search) >= 0;
 };
+
+enum VoiceCMDBuilderKey {
+    DEVICES = 1,
+    CMDS,
+    TIMES,
+    HDMINUMBERS
+}
+
+class VoiceCMDBuilder {
+    data: any;
+
+    constructor() {
+        this.data = {};
+    }
+
+    push = (key: string, data: any)=> {
+        if (!( key in this.data)) {
+            this.data[key] = [];
+        }
+
+        this.data[key].push(data);
+    }
+
+    pushDevice = (data: Device) => {
+        if (data) {
+            this.push(VoiceCMDBuilderKey[VoiceCMDBuilderKey.DEVICES], data);
+        }
+    }
+
+    pushTimes = (data: number) => {
+        if (data) {
+            this.push(VoiceCMDBuilderKey[VoiceCMDBuilderKey.TIMES], data);
+        }
+    }
+
+    pushCMD = (data: AssociationCMD) => {
+        if (data) {
+            this.push(VoiceCMDBuilderKey[VoiceCMDBuilderKey.CMDS], data);
+        }
+    }
+
+    pushHDMINumber = (data: number) => {
+        if (data) {
+            this.push(VoiceCMDBuilderKey[VoiceCMDBuilderKey.HDMINUMBERS], data);
+        }
+    }
+
+    length = ()=> {
+        let key = VoiceCMDBuilderKey[VoiceCMDBuilderKey.DEVICES];
+        return key in this.data && this.data[key] && this.data[key].length || 0;
+    }
+
+    shift = (key: string)=> {
+        if (key in this.data && this.data[key] && this.data[key].length) {
+            return this.data[key].shift();
+        }
+    }
+
+    shiftDevice = (): Device => {
+        return this.shift(VoiceCMDBuilderKey[VoiceCMDBuilderKey.DEVICES]) as Device;
+    }
+
+    shiftTimes = (): number => {
+        return this.shift(VoiceCMDBuilderKey[VoiceCMDBuilderKey.TIMES]) as number;
+    }
+
+    shiftHDMINumber = (): number => {
+        return this.shift(VoiceCMDBuilderKey[VoiceCMDBuilderKey.HDMINUMBERS]) as number;
+    }
+
+    shiftCMD = (): AssociationCMD => {
+        return this.shift(VoiceCMDBuilderKey[VoiceCMDBuilderKey.CMDS]) as AssociationCMD;
+    }
+
+    build = (): VoiceCMD[] => {
+        let array: VoiceCMD[] = [];
+
+        if (this.length()) {
+
+            let device;
+            while (device = this.shift(VoiceCMDBuilderKey[VoiceCMDBuilderKey.DEVICES])) {
+
+                let voiceCMD: VoiceCMD = {
+                    device: device,
+                    cmdDefinition: this.shiftCMD(),
+                    times: 1
+                }
+
+                if (voiceCMD.cmdDefinition) {
+
+                    if (voiceCMD.cmdDefinition.uniqTerm === "selectHDMI") {
+                        let hdmiNumber = this.shiftHDMINumber();
+                        voiceCMD.cmdDefinition = JSON.parse(JSON.stringify(voiceCMD.cmdDefinition));
+                        voiceCMD.cmdDefinition.cmd = voiceCMD.cmdDefinition.cmd + hdmiNumber;
+                    }
+
+
+                    if (voiceCMD.cmdDefinition.multiple) {
+                        let times = this.shiftTimes();
+                        if (times) {
+                            voiceCMD.times = times;
+                        }
+                    }
+                }
+
+                array.push(voiceCMD);
+            }
+
+        }
+        return array;
+    }
+}
 
 export class Detector {
     witToken: string;
@@ -61,7 +170,7 @@ export class Detector {
     }
 
 
-    detect = (data: string): Promise<VoiceCMD> => {
+    detect = (data: string): Promise<VoiceCMD[]> => {
         if (this.witToken) {
             return this.detectWit(data).catch((rejected)=> {
                 console.log("ERROR WIT: " + rejected);
@@ -72,14 +181,12 @@ export class Detector {
         }
     };
 
-    detectWit = (data: string): Promise<VoiceCMD> => {
+    detectWit = (data: string): Promise<VoiceCMD[]> => {
         return this.witClient.message(data, {}).then((sentence)=> {
             console.log(JSON.stringify(sentence));
-            return new Promise<VoiceCMD>((accept, reject)=> {
+            return new Promise<VoiceCMD[]>((accept, reject)=> {
 
-                let cmdDef: AssociationCMD = null;
-                let times = 1;
-                let device = Device.NONE;
+                let builder = new VoiceCMDBuilder();
 
                 for (let entityKey in sentence.entities) {
 
@@ -93,45 +200,31 @@ export class Detector {
                         if (confidence >= this.witConfidenceLimit) {
 
                             if (entityKey === "device") {
-                                device = this.detectUniqDevice(value);
+                                builder.pushDevice(this.detectUniqDevice(value));
                             } else if (entityKey === "on_off_toggle") {
                                 let powerChoice = "power" + value.substr(0, 1).toUpperCase() + value.substr(1);
-                                let c = this.detectUniqCMD(powerChoice);
-                                if (c) {
-                                    cmdDef = c;
-                                }
-                            } else if (entityKey === "number") {
-                                times = value as any as number;
+                                builder.pushCMD(this.detectUniqCMD(powerChoice));
+                            } else if (entityKey === "times" || entityKey === "number") {
+                                builder.pushTimes(value as any as number);
+                            } else if (entityKey === "hdmiNumber") {
+                                builder.pushHDMINumber(value as any as number);
                             } else {
-                                let c = this.detectUniqCMD(entityKey);
-                                if (c) {
-                                    cmdDef = c;
-                                }
+                                builder.pushCMD(this.detectUniqCMD(entityKey));
                             }
                         }
                     }
                 }
 
-                if (cmdDef && !cmdDef.multiple) {
-                    times = 1;
-                }
-
-                let voiceCMD: VoiceCMD = {
-                    cmdDefinition: cmdDef,
-                    device: device,
-                    times: times
-                };
-
-                accept(voiceCMD);
+                accept(builder.build());
             });
         });
     };
 
-    detectClassic = (data: string): Promise<VoiceCMD> => {
+    detectClassic = (data: string): Promise<VoiceCMD[]> => {
 
         let detected: VoiceCMD = null;
 
-        return new Promise<VoiceCMD>((accept, reject)=> {
+        return new Promise<VoiceCMD[]>((accept, reject)=> {
             if (!data) {
                 reject(detected);
             } else {
@@ -157,7 +250,11 @@ export class Detector {
                         detected.times = 1;
                     }
                 }
-                accept(detected);
+
+                let array = [];
+                array.push(detected);
+
+                accept(array);
             }
         });
     };
